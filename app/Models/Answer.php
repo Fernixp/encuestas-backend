@@ -11,11 +11,12 @@ class Answer extends Model
 
     protected $fillable = [
         'option_id',
+        'result'
     ];
 
     public function option()
     {
         //pertenece a una encuesta 
-        return $this->belongsTo(Question::class);
+        return $this->belongsTo(Option::class);
     }
 }

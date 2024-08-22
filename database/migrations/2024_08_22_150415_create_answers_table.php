@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('option_id');
             $table->foreign('option_id')->references('id')->on('options');
+            $table->integer('result');
             $table->timestamps();
         });
     }

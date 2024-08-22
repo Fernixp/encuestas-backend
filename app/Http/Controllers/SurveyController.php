@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SurveyStoreRequest;
 use App\Http\Requests\SurveyUpdateRequest;
 use App\Models\Survey;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class SurveyController extends Controller
@@ -14,16 +15,16 @@ class SurveyController extends Controller
      */
     public function index()
     {
-        $surveys = Survey::all();
-        if ($surveys->count() === 0) {
+        $surveys = Survey::with('questions')->get();
+        if ($surveys->isEmpty()) {
             return response()->json([
-                'message' => 'No se encontraron resultados en la busqueda.'
+                'message' => 'No se encontraron resultados en la búsqueda.'
             ], 404);
         }
 
         return response()->json([
             'data' => $surveys,
-        ], 201);
+        ], 200);
     }
 
     /**
@@ -34,7 +35,7 @@ class SurveyController extends Controller
         $survey = Survey::create($request->all());
         return response()->json([
             'message' => 'Encuesta creada correctamente',
-            'survey' => $survey,
+            'data' => $survey,
         ], 201);
     }
 
@@ -43,16 +44,17 @@ class SurveyController extends Controller
      */
     public function show(string $id)
     {
-        $survey = Survey::find($id);
-        if (!$survey) {
+        try {
+            $survey = Survey::with('questions')->findOrFail($id);
             return response()->json([
-                'message' => 'No se encontraron resultados de la busqueda!',
-            ], 404);
+                'message' => 'Encuesta encontrada!',
+                'data' => $survey,
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'No se encontraron resultados de la búsqueda!',
+            ], 404); 
         }
-        return response()->json([
-            'message' => 'Encuesta encontrada!',
-            'survey' => $survey,
-        ], 201);
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OptionController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\SurveyController;
 use Illuminate\Http\Request;
@@ -11,4 +12,5 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('/surveys', SurveyController::class);
 Route::apiResource('/questions', QuestionController::class);
+Route::apiResource('/options', OptionController::class);
 

@@ -16,7 +16,7 @@ class Answer extends Model
 
     public function option()
     {
-        //pertenece a una encuesta 
+        //pertenece a una opcion
         return $this->belongsTo(Option::class);
     }
 }

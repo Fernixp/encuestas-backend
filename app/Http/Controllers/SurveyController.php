@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SurveyStoreRequest;
 use App\Http\Requests\SurveyUpdateRequest;
+use App\Models\Option;
 use App\Models\Survey;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -43,19 +44,38 @@ class SurveyController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-        try {
-            $survey = Survey::with('questions')->findOrFail($id);
-            return response()->json([
-                'message' => 'Encuesta encontrada!',
-                'data' => $survey,
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'No se encontraron resultados de la búsqueda!',
-            ], 404); 
+{
+    try {
+        // Incluye preguntas, las opciones relacionadas con cada pregunta y los resultados de cada opción
+        $survey = Survey::with(['questions.options'])->findOrFail($id);
+
+        // Obtener los resultados agregados
+        $options = Option::select('options.id', 'option_text', 'question_id')
+            ->leftJoin('answers', 'options.id', '=', 'answers.option_id')
+            ->selectRaw('SUM(answers.result) as total_results')
+            ->groupBy('options.id', 'option_text', 'question_id')
+            ->whereIn('question_id', $survey->questions->pluck('id'))
+            ->get();
+
+        // Añadir los resultados agregados a las opciones de cada pregunta
+        foreach ($survey->questions as $question) {
+            foreach ($question->options as $option) {
+                // Asegurarse de que total_results sea un número
+                $option->total_results = (int) ($options->where('id', $option->id)->first()->total_results ?? 0);
+            }
         }
+
+        return response()->json([
+            'message' => 'Encuesta encontrada!',
+            'data' => $survey,
+        ], 200);
+    } catch (ModelNotFoundException $e) {
+        return response()->json([
+            'message' => 'No se encontraron resultados de la búsqueda!',
+        ], 404); 
     }
+}
+
 
     /**
      * Update the specified resource in storage.

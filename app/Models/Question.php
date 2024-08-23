@@ -17,4 +17,9 @@ class Question extends Model
         //pertenece a una encuesta 
         return $this->belongsTo(Survey::class);
     }
+
+    public function options()
+    {
+        return $this->hasMany(Option::class);
+    }
 }

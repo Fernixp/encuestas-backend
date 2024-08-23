@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             SurveySeeder::class,
             QuestionSeeder::class,
             OptionSeeder::class,
-            AnswerSeeder::class,
+            //AnswerSeeder::class,
         ]);
     }
 }
